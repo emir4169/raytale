@@ -9,7 +9,8 @@ CHECKLIST THAT I TOTALLY DIDNT ADD JUST NOW:
 * [x] render the gosh darn stats
 * [x] make the arena render in a way that is accurate to the game
 * [x] menuMove.ogg
-* [x]fix the readme
+* [x] fix the readme
+* [x] fix the previous check wait what do you mean i cant just add checks for fixing other checks
 * [ ] fighting
 * [ ] dialogue
 * [ ] acting
