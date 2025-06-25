@@ -46,7 +46,9 @@ int main ()
 	SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
 	SetTargetFPS(30);
 	// Create the window and OpenGL context
-	InitWindow(640, 480, "Hello Raylib");																																																																																																							// end the frame and get ready for the next one  (displ */
+	InitWindow(640, 480, "Raytale");			// i owe you credits sawby08 for giving me the name inspiration and getting the sprites n stuff
+	InitAudioDevice();
+																																																																																																					// end the frame and get ready for the next one  (displ */
 	// Utility function from resource_dir.h to find the resources folder and set it as the current working directory so we can load from it
 	SearchAndSetResourceDir("resources");
 
@@ -61,6 +63,7 @@ int main ()
 	Texture itembtt_selected = LoadTexture ("bt/item-selected.png");
 	Texture mercybtt_selected = LoadTexture("bt/mercy-selected.png");
 	Texture hearttexture = LoadTexture("ut-heart.png");
+	Texture enemytexture = LoadTexture("test1.png");
 	Sound menuMoveSound = LoadSound("menuMove.ogg");
 	// game loop
 	while (!WindowShouldClose())		// run the loop untill the user presses ESCAPE or presses the Close button on the window
@@ -125,6 +128,7 @@ int main ()
 		//DrawLineV(arenaShape[2], arenaShape[3], RED);
 		//DrawLineV(arenaShape[3], arenaShape[0], RED);
 		DrawShape(arenaShape, ARENA_LENGTH, RED);
+		//DrawLineStrip(arenaShape, ARENA_LENGTH, RED);
 		// Setup the back buffer for drawing (clear color and depth buffers)
 		ClearBackground(BLACK);
 
@@ -133,6 +137,7 @@ int main ()
 		DrawText(TextFormat("BattleState: %d", BattleState), 10, 10, 20, WHITE);
 		DrawText(TextFormat("SOUL X: %d \nSOUL Y: %d", (int)SoulPos.x, (int)SoulPos.y), 10, 40, 20, WHITE);
 		// draw our texture to the screen
+		DrawTextureV(enemytexture, (Vector2){ 145, 34 }, WHITE);
 		switch (BattleState)
 		{
 		case PLAYER:
@@ -167,12 +172,12 @@ int main ()
 			}
 			DrawTexture(hearttexture, ButtonPos[button_selected].x+8, ButtonPos[button_selected].y+13, RED);
 			break;
-			case ENEMY:
-				DrawTextureV(fightbtt, 			ButtonPos[0], WHITE);
-				DrawTextureV(actbtt,   			ButtonPos[1], WHITE);
-				DrawTextureV(itembtt,  			ButtonPos[2], WHITE);
-				DrawTextureV(mercybtt, ButtonPos[3], WHITE);
-				DrawTextureV(hearttexture, SoulPos, RED);
+		case ENEMY:
+			DrawTextureV(fightbtt, 			ButtonPos[0], WHITE);
+			DrawTextureV(actbtt,   			ButtonPos[1], WHITE);
+			DrawTextureV(itembtt,  			ButtonPos[2], WHITE);
+			DrawTextureV(mercybtt, ButtonPos[3], WHITE);
+			DrawTextureV(hearttexture, SoulPos, RED);
 			}
 		// end the frame and get ready for the next one  (display frame, poll input, etc...)
 		EndDrawing();
@@ -191,7 +196,9 @@ int main ()
 	UnloadTexture(mercybtt_selected);
 	UnloadTexture(hearttexture);
 	UnloadSound(menuMoveSound);         
+	UnloadTexture(enemytexture);
 	// destroy the window and cleanup the OpenGL context
+	CloseAudioDevice();
 	CloseWindow();
 	return 0;
 }
