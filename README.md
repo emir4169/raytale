@@ -22,5 +22,5 @@ CHECKLIST THAT I TOTALLY DIDNT ADD JUST NOW:
 
 ## HOW LONG DID THIS TAKE
 like 6 hours so far im not the smartest ok
-##CREDITS
+## CREDITS
 [sawby08](https://github.com/sawby08) for the fonts n sprites in their lovetale project
