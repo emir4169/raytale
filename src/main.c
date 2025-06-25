@@ -10,6 +10,7 @@ by Jeffery Myers is marked with CC0 1.0. To view a copy of this license, visit h
 #include <stdlib.h>
 #include "raylib.h"
 #include <stdio.h>
+#include <string.h>
 #include "resource_dir.h"	// utility header for SearchAndSetResourceDir
 #define ARENA_OFFSET_X 35
 #define ARENA_OFFSET_Y 253
@@ -43,6 +44,24 @@ typedef enum ButtonEnum { FIGHT = 0, ACT, ITEM, MERCY } ButtonEnum; // this stor
 typedef enum PlayerActionEnum { SB = 0, FIGHT_SE, FIGHT_MG, ACT_SE, ACT_SA, ITEM_ACT, MERCY_SE } PlayerActionEnum; // SE stands for Select Enemy, MG stands for MiniGame and SA stands for Select Action
 PlayerActionEnum PlayerAction = SB; // SB is select button
 BattleStateEnum BattleState = PLAYER;
+// dialogue stuff
+char dialogueTBR[256] = "* You encountered the Dummy"; // what we are gonna render
+char dialogueSF[256] = ""; // string of how much we have rendered so far
+int dialogueIndex = 0; // index of the current dialogue character
+// function to increment the dialogue index along with the string
+void dinc() {
+	if (dialogueIndex < strlen(dialogueTBR)) {
+		dialogueSF[dialogueIndex] = dialogueTBR[dialogueIndex];
+		dialogueIndex++;
+	} else {
+		dialogueSF[dialogueIndex] = '\0'; // null terminate the string
+	}
+}
+void dreset() {
+	dialogueIndex = 0; // reset the index
+	dialogueSF[0] = '\0'; // reset the string
+}
+
 void DrawShape(Vector2 *shape, int numPoints, Color color)
 {
 	for (int i = 0; i < numPoints; i++)
@@ -87,7 +106,6 @@ void DrawTextFont(const char *text, int posX, int posY, int fontSize, Color colo
     if (font.texture.id != 0)
     {
         Vector2 position = { (float)posX, (float)posY };
-
         int defaultFontSize = 13.333;   // Default Font chars height in pixel
         if (fontSize < defaultFontSize) fontSize = defaultFontSize;
         int spacing = fontSize/defaultFontSize;
@@ -218,6 +236,9 @@ int main ()
 		//DrawLine(int startPosX, int startPosY, int endPosX, int endPosY, Color color);  
 		//DrawLineV(arenaShape[0], arenaShape[1], RED);
 		//DrawLineV(arenaShape[1], arenaShape[2], RED);
+		dinc();
+		//DrawTextFont(dialogueSF, 52, 274, 32, WHITE, DTMono);
+		DrawTextEx(DTMono, dialogueSF, (Vector2){52, 274}, DTMono.baseSize, 1, WHITE);
 		//DrawLineV(arenaShape[2], arenaShape[3], RED);
 		//DrawLineV(arenaShape[3], arenaShape[0], RED);
 		// void DrawRectangleLinesEx(Rectangle rec, float lineThick, Color color);
