@@ -61,6 +61,7 @@ int main ()
 	Texture itembtt_selected = LoadTexture ("bt/item-selected.png");
 	Texture mercybtt_selected = LoadTexture("bt/mercy-selected.png");
 	Texture hearttexture = LoadTexture("ut-heart.png");
+	Sound menuMoveSound = LoadSound("menuMove.ogg");
 	// game loop
 	while (!WindowShouldClose())		// run the loop untill the user presses ESCAPE or presses the Close button on the window
 	{
@@ -72,11 +73,13 @@ int main ()
 		case PLAYER:
 			if (IsKeyPressed(KEY_RIGHT))	
 			{
+				PlaySound(menuMoveSound);
 				button_selected++;
 				if (button_selected > 3) button_selected = 0; // wrap around
 			}
 			else if (IsKeyPressed(KEY_LEFT))
 			{
+				PlaySound(menuMoveSound);
 				button_selected--;
 				if (button_selected < 0) button_selected = 3; // wrap around
 			}
@@ -187,7 +190,7 @@ int main ()
 	UnloadTexture(itembtt_selected);
 	UnloadTexture(mercybtt_selected);
 	UnloadTexture(hearttexture);
-
+	UnloadSound(menuMoveSound);         
 	// destroy the window and cleanup the OpenGL context
 	CloseWindow();
 	return 0;
