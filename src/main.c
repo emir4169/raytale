@@ -40,7 +40,8 @@ int SoulSpeed = 4;
 bool isSlow = false; // X button thingamajing
 typedef enum BattleStateEnum { PLAYER = 0, ENEMY } BattleStateEnum; // this stores the core state of the battle
 typedef enum ButtonEnum { FIGHT = 0, ACT, ITEM, MERCY } ButtonEnum; // this stores the buttons
-typedef enum PlayerActionEnum { FIGHT_SE = 0, FIGHT_MG, ACT_SE, ACT_SA, ITEM_ACT, MERCY_SE } PlayerActionEnum; // SE stands for Select Enemy, MG stands for MiniGame and SA stands for Select Action
+typedef enum PlayerActionEnum { SB = 0, FIGHT_SE, FIGHT_MG, ACT_SE, ACT_SA, ITEM_ACT, MERCY_SE } PlayerActionEnum; // SE stands for Select Enemy, MG stands for MiniGame and SA stands for Select Action
+PlayerActionEnum PlayerAction = SB; // SB is select button
 BattleStateEnum BattleState = PLAYER;
 void DrawShape(Vector2 *shape, int numPoints, Color color)
 {
@@ -135,18 +136,21 @@ int main ()
 		switch (BattleState)
 		{
 		case PLAYER:
-			if (IsKeyPressed(KEY_RIGHT))	
-			{
-				PlaySound(menuMoveSound);
-				button_selected++;
-				if (button_selected > 3) button_selected = 0; // wrap around
-			}
-			else if (IsKeyPressed(KEY_LEFT))
-			{
-				PlaySound(menuMoveSound);
-				button_selected--;
-				if (button_selected < 0) button_selected = 3; // wrap around
-			}
+			switch (PlayerAction)
+				case (SB):
+					if (IsKeyPressed(KEY_RIGHT))	
+					{
+						PlaySound(menuMoveSound);
+						button_selected++;
+						if (button_selected > 3) button_selected = 0; // wrap around
+					}
+					else if (IsKeyPressed(KEY_LEFT))
+					{
+						PlaySound(menuMoveSound);
+						button_selected--;
+						if (button_selected < 0) button_selected = 3; // wrap around
+					}
+				break;
 			break;
 		case ENEMY:
 			if (IsKeyDown(KEY_X))
@@ -251,7 +255,9 @@ int main ()
 				default:
 					break;
 			}
-			DrawTexture(hearttexture, ButtonPos[button_selected].x+8, ButtonPos[button_selected].y+13, RED);
+			if (PlayerAction == SB){
+				DrawTexture(hearttexture, ButtonPos[button_selected].x+8, ButtonPos[button_selected].y+13, RED);
+			}
 			break;
 		case ENEMY:
 			DrawTextureV(fightbtt, 			ButtonPos[0], WHITE);
