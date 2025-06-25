@@ -7,6 +7,7 @@ by Jeffery Myers is marked with CC0 1.0. To view a copy of this license, visit h
 
 */
 
+#include <stdlib.h>
 #include "raylib.h"
 #include <stdio.h>
 #include "resource_dir.h"	// utility header for SearchAndSetResourceDir
@@ -25,11 +26,21 @@ Vector2 ButtonPos[4] = {
 	{343, 432},  // item button
 	{501, 432}   // mercy button
 };
+struct PlayerStruct
+{
+	int LOVE;
+	int HP;
+	int maxHP;
+	char name[6];
+};
+struct PlayerStruct player = { 1, 20, 20, "CHARA" };
 int button_selected = 0; // 0 = fight, 1 = act, 2 = item, 3 = mercy
 Vector2 SoulPos = { 36, 254 }; // position of the soul in the arena
 int SoulSpeed = 4;
 bool isSlow = false; // X button thingamajing
 typedef enum BattleStateEnum { PLAYER = 0, ENEMY } BattleStateEnum; // this stores the core state of the battle
+typedef enum ButtonEnum { FIGHT = 0, ACT, ITEM, MERCY } ButtonEnum; // this stores the buttons
+typedef enum PlayerActionEnum { FIGHT_SE = 0, FIGHT_MG, ACT_SE, ACT_SA, ITEM_ACT, MERCY_SE } PlayerActionEnum; // SE stands for Select Enemy, MG stands for MiniGame and SA stands for Select Action
 BattleStateEnum BattleState = PLAYER;
 void DrawShape(Vector2 *shape, int numPoints, Color color)
 {
@@ -38,6 +49,50 @@ void DrawShape(Vector2 *shape, int numPoints, Color color)
 		int nextIndex = (i + 1) % numPoints;
 		DrawLineV(shape[i], shape[nextIndex], color);
 	}
+}
+
+
+void DrawShapeLS(Vector2 *shape, int numPoints, Color color, int thickness)
+{
+    // Calculate grid size
+    const int gridSize = thickness;
+    
+    // Create a temporary point array
+    Vector2 *tempPoints = (Vector2 *)malloc(numPoints * sizeof(Vector2));
+    if (!tempPoints) return;
+    
+    // Draw the shape with perfect thickness
+    for (int dx = -thickness; dx <= thickness; dx++) {
+        for (int dy = -thickness; dy <= thickness; dy++) {
+            // Skip center for even thickness to maintain symmetry
+            if (thickness % 2 == 0 && dx == 0 && dy == 0) continue;
+            
+            // Apply offset to all points
+            for (int i = 0; i < numPoints; i++) {
+                tempPoints[i].x = shape[i].x + dx;
+                tempPoints[i].y = shape[i].y + dy;
+            }
+            
+            // Draw the offset shape
+            DrawShape(tempPoints, numPoints, color);
+        }
+    }
+    
+    free(tempPoints);
+}
+void DrawTextFont(const char *text, int posX, int posY, int fontSize, Color color, Font font)
+{
+    // Check if default font has been loaded
+    if (font.texture.id != 0)
+    {
+        Vector2 position = { (float)posX, (float)posY };
+
+        int defaultFontSize = 13.333;   // Default Font chars height in pixel
+        if (fontSize < defaultFontSize) fontSize = defaultFontSize;
+        int spacing = fontSize/defaultFontSize;
+
+        DrawTextEx(font, text, position, (float)fontSize, (float)spacing, color);
+    }
 }
 
 int main ()
@@ -64,6 +119,12 @@ int main ()
 	Texture mercybtt_selected = LoadTexture("bt/mercy-selected.png");
 	Texture hearttexture = LoadTexture("ut-heart.png");
 	Texture enemytexture = LoadTexture("test1.png");
+	Font DTMono = LoadFont("font/determination-mono.ttf");
+	Font utdotumche = LoadFont("font/undertale-dotumche.ttf");
+	Font dotumche = LoadFont("font/dotumche.ttf");
+	Font mars = LoadFont("font/mars.ttf");
+	Texture kr_texture = LoadTexture("ui/spr_krmeter_0.png");
+	Texture hp_texture = LoadTexture("ui/spr_hpname_0.png");
 	Sound menuMoveSound = LoadSound("menuMove.ogg");
 	// game loop
 	while (!WindowShouldClose())		// run the loop untill the user presses ESCAPE or presses the Close button on the window
@@ -112,10 +173,10 @@ int main ()
 				SoulPos.y += SoulSpeed/(isSlow ? 2 : 1);
 			}
 			// keep the soul inside the arena
-			if (SoulPos.x < arenaShape[0].x + 0) SoulPos.x = arenaShape[0].x + 0; // left side
-			if (SoulPos.x > arenaShape[1].x - 16) SoulPos.x = arenaShape[1].x - 16; // right side
-			if (SoulPos.y < arenaShape[0].y + 0) SoulPos.y = arenaShape[0].y + 0; // top side
-			if (SoulPos.y > arenaShape[2].y - 16) SoulPos.y = arenaShape[2].y - 16; // bottom side
+			if (SoulPos.x < arenaShape[0].x) SoulPos.x = arenaShape[0].x; // left side
+			if (SoulPos.x > arenaShape[1].x - (16)) SoulPos.x = arenaShape[1].x - (16); // right side
+			if (SoulPos.y < arenaShape[0].y) SoulPos.y = arenaShape[0].y; // top side
+			if (SoulPos.y > arenaShape[2].y - (16)) SoulPos.y = arenaShape[2].y - (16); // bottom side
 		default:
 			break;
 		}
@@ -127,17 +188,37 @@ int main ()
 		//DrawLineV(arenaShape[1], arenaShape[2], RED);
 		//DrawLineV(arenaShape[2], arenaShape[3], RED);
 		//DrawLineV(arenaShape[3], arenaShape[0], RED);
-		DrawShape(arenaShape, ARENA_LENGTH, RED);
+		// void DrawRectangleLinesEx(Rectangle rec, float lineThick, Color color);
+		Rectangle arenaRect = { arenaShape[0].x-5, arenaShape[0].y-5, arenaShape[1].x+10 - arenaShape[0].x, arenaShape[2].y+10 - arenaShape[0].y };
+		DrawRectangleLinesEx(arenaRect, 5, WHITE);
+		//DrawShapeLS(arenaShape, ARENA_LENGTH, WHITE, 5); // draw the arena shape with a line width of 2
 		//DrawLineStrip(arenaShape, ARENA_LENGTH, RED);
 		// Setup the back buffer for drawing (clear color and depth buffers)
 		ClearBackground(BLACK);
 
 		// draw some text using the default font
-		DrawText("Hello Raylib", 200,200,20,WHITE);
-		DrawText(TextFormat("BattleState: %d", BattleState), 10, 10, 20, WHITE);
-		DrawText(TextFormat("SOUL X: %d \nSOUL Y: %d", (int)SoulPos.x, (int)SoulPos.y), 10, 40, 20, WHITE);
+		DrawTextFont("Hello Raylib", 200,200,24,WHITE, mars);
+		DrawTextFont(TextFormat("BattleState: %d", BattleState), 10, 10, 24, WHITE,mars);
+		DrawTextFont(TextFormat("SOUL X: %d \nSOUL Y: %d", (int)SoulPos.x, (int)SoulPos.y), 10, 40, 24, WHITE,mars);
+		//DrawTextureV(kr_texture, (Vector2){ 10, 70 }, WHITE);
+		DrawTextFont(TextFormat("LV %d", player.LOVE), 148, 400, 24, WHITE,mars);
+		DrawTextureV(hp_texture, (Vector2){ 240, 400 }, WHITE);
+		//DrawRectangle(int posX, int posY, int width, int height, Color color);
+		//love.graphics.rectangle( mode , x,   y,   width,                  height, rx, ry, segments )
+		//love.graphics.rectangle('fill', 275, 400, player.stats.hp * 1.25, 21)
+		DrawRectangle(275, 400, player.maxHP*1.25, 21, RED);
+		DrawRectangle(275, 400, player.HP*1.25,21,YELLOW );
+
+		DrawTextFont(player.name, 30, 400, 24, WHITE,mars);
+		if (player.HP < 10) {
+			DrawTextFont(TextFormat("0%d / %d ", player.HP, player.maxHP), 289 + player.maxHP*1.25, 400, 24, WHITE,mars);
+		} else {
+			DrawTextFont(TextFormat("%d / %d ", player.HP, player.maxHP), 289 + player.maxHP*1.25, 400, 24, WHITE,mars);
+		}
+
+
 		// draw our texture to the screen
-		DrawTextureV(enemytexture, (Vector2){ 145, 34 }, WHITE);
+		//DrawTextureV(enemytexture, (Vector2){ 145, 34 }, WHITE);
 		switch (BattleState)
 		{
 		case PLAYER:
@@ -197,6 +278,12 @@ int main ()
 	UnloadTexture(hearttexture);
 	UnloadSound(menuMoveSound);         
 	UnloadTexture(enemytexture);
+	UnloadTexture(kr_texture);
+	UnloadTexture(hp_texture);
+	UnloadFont(mars);
+	UnloadFont(dotumche);
+	UnloadFont(utdotumche);
+	UnloadFont(DTMono);
 	// destroy the window and cleanup the OpenGL context
 	CloseAudioDevice();
 	CloseWindow();
