@@ -64,10 +64,6 @@ int main ()
 	// game loop
 	while (!WindowShouldClose())		// run the loop untill the user presses ESCAPE or presses the Close button on the window
 	{
-		// update
-		if (IsKeyDown(KEY_F1)){
-			printf(TextFormat("POS: %d, %d", SoulPos.x, SoulPos.y));
-		}
 		if (IsKeyPressed(KEY_ENTER)){
 			BattleState = (BattleState == PLAYER) ? ENEMY : PLAYER; // toggle between player and enemy state
 		}
@@ -109,6 +105,11 @@ int main ()
 			{	
 				SoulPos.y += SoulSpeed/(isSlow ? 2 : 1);
 			}
+			// keep the soul inside the arena
+			if (SoulPos.x < arenaShape[0].x + 0) SoulPos.x = arenaShape[0].x + 0; // left side
+			if (SoulPos.x > arenaShape[1].x - 16) SoulPos.x = arenaShape[1].x - 16; // right side
+			if (SoulPos.y < arenaShape[0].y + 0) SoulPos.y = arenaShape[0].y + 0; // top side
+			if (SoulPos.y > arenaShape[2].y - 16) SoulPos.y = arenaShape[2].y - 16; // bottom side
 		default:
 			break;
 		}
