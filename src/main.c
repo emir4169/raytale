@@ -137,7 +137,8 @@ int main ()
 		{
 		case PLAYER:
 			switch (PlayerAction)
-				case (SB):
+			{
+				case (SB): // OH GOD SWITH CASES IN SWITCH CASES
 					if (IsKeyPressed(KEY_RIGHT))	
 					{
 						PlaySound(menuMoveSound);
@@ -150,7 +151,35 @@ int main ()
 						button_selected--;
 						if (button_selected < 0) button_selected = 3; // wrap around
 					}
+					if (IsKeyPressed(KEY_Z)){
+						switch (button_selected)
+						{
+						case FIGHT:
+							PlayerAction = FIGHT_SE;
+							break;
+						case ACT:
+							PlayerAction = ACT_SE;
+							break;
+						case ITEM:
+							PlayerAction = ITEM_ACT;
+							break;
+						case MERCY:
+							PlayerAction = MERCY_SE;
+							break;
+						}
+					}
+					break;
+				default:
+					if (IsKeyPressed(KEY_X)){
+						if (BattleState == PLAYER){
+							PlayerAction = SB;
+						} else {
+							BattleState = PLAYER;
+						}
+					}
+					break;
 				break;
+			}
 			break;
 		case ENEMY:
 			if (IsKeyDown(KEY_X))
@@ -181,7 +210,6 @@ int main ()
 			if (SoulPos.x > arenaShape[1].x - (16)) SoulPos.x = arenaShape[1].x - (16); // right side
 			if (SoulPos.y < arenaShape[0].y) SoulPos.y = arenaShape[0].y; // top side
 			if (SoulPos.y > arenaShape[2].y - (16)) SoulPos.y = arenaShape[2].y - (16); // bottom side
-		default:
 			break;
 		}
 
