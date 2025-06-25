@@ -9,14 +9,15 @@ CHECKLIST THAT I TOTALLY DIDNT ADD JUST NOW:
 * [x] render the gosh darn stats
 * [x] make the arena render in a way that is accurate to the game
 * [x] menuMove.ogg
-* [] fighting
-* [] dialogue
-* [] acting
-* [] items
-* [] sprites
-* [] egg
-* [] attacks
-* [] obligatory kr
+* [x]fix the readme
+* [ ] fighting
+* [ ] dialogue
+* [ ] acting
+* [ ] items
+* [ ] sprites
+* [ ] egg
+* [ ] attacks
+* [ ] obligatory kr
 
 ## HOW LONG DID THIS TAKE
 like 6 hours so far im not the smartest ok
