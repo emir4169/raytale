@@ -11,6 +11,8 @@ CHECKLIST THAT I TOTALLY DIDNT ADD JUST NOW:
 * [x] menuMove.ogg
 * [x] fix the readme
 * [x] fix the previous check wait what do you mean i cant just add checks for fixing other checks
+* [x] add basic menu travelling thingamajings, it probably doesnt count cause no dialogue and no menus to travel
+* [x] add a new check to this readme
 * [ ] fighting
 * [ ] dialogue
 * [ ] acting
