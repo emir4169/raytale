@@ -26,7 +26,7 @@ Vector2 ButtonPos[4] = {
 	{501, 432}   // mercy button
 };
 int button_selected = 0; // 0 = fight, 1 = act, 2 = item, 3 = mercy
-Vector2 SoulPos = { 200+253, 50+35 }; // position of the soul in the arena
+Vector2 SoulPos = { 36, 254 }; // position of the soul in the arena
 int SoulSpeed = 4;
 bool isSlow = false; // X button thingamajing
 typedef enum BattleStateEnum { PLAYER = 0, ENEMY } BattleStateEnum; // this stores the core state of the battle
@@ -128,6 +128,7 @@ int main ()
 		// draw some text using the default font
 		DrawText("Hello Raylib", 200,200,20,WHITE);
 		DrawText(TextFormat("BattleState: %d", BattleState), 10, 10, 20, WHITE);
+		DrawText(TextFormat("SOUL X: %d \nSOUL Y: %d", (int)SoulPos.x, (int)SoulPos.y), 10, 40, 20, WHITE);
 		// draw our texture to the screen
 		switch (BattleState)
 		{
