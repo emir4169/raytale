@@ -61,6 +61,18 @@ int main ()
 	// game loop
 	while (!WindowShouldClose())		// run the loop untill the user presses ESCAPE or presses the Close button on the window
 	{
+		// update
+		if (IsKeyPressed(KEY_RIGHT))
+		{
+			button_selected++;
+			if (button_selected > 3) button_selected = 0; // wrap around
+		}
+		else if (IsKeyPressed(KEY_LEFT))
+		{
+			button_selected--;
+			if (button_selected < 0) button_selected = 3; // wrap around
+		}
+
 		// drawing
 		BeginDrawing();
 		//DrawLine(int startPosX, int startPosY, int endPosX, int endPosY, Color color);  
