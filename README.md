@@ -14,10 +14,9 @@ CHECKLIST THAT I TOTALLY DIDNT ADD JUST NOW:
 * [x] add basic menu travelling thingamajings, it probably doesnt count cause no dialogue and no menus to travel
 * [x] add a new check to this readme
 * [ ] fighting
-* [ ] dialogue
+* [x] dialogue
 * [ ] acting
 * [ ] items
-* [ ] sprites
 * [ ] egg
 * [ ] attacks
 * [ ] obligatory kr

@@ -12,14 +12,14 @@ by Jeffery Myers is marked with CC0 1.0. To view a copy of this license, visit h
 #include <stdio.h>
 #include <string.h>
 #include "resource_dir.h"	// utility header for SearchAndSetResourceDir
-#define ARENA_OFFSET_X 35
-#define ARENA_OFFSET_Y 253
+#define ARENA_OFFSET_X 32
+#define ARENA_OFFSET_Y 250
 #define ARENA_LENGTH 4
 Vector2 arenaShape[ARENA_LENGTH] = {
 	{0+ARENA_OFFSET_X, 0+ARENA_OFFSET_Y},
-	{565+ARENA_OFFSET_X, 0+ARENA_OFFSET_Y},
-	{565+ARENA_OFFSET_X, 130+ARENA_OFFSET_Y},
-	{0+ARENA_OFFSET_X,130+ARENA_OFFSET_Y}
+	{573+ARENA_OFFSET_X, 0+ARENA_OFFSET_Y},
+	{573+ARENA_OFFSET_X, 137+ARENA_OFFSET_Y},
+	{0+ARENA_OFFSET_X,137+ARENA_OFFSET_Y}
 };
 Vector2 ButtonPos[4] = {
 	{27, 432},   // fight button
@@ -138,13 +138,19 @@ int main ()
 	Texture mercybtt_selected = LoadTexture("bt/mercy-selected.png");
 	Texture hearttexture = LoadTexture("ut-heart.png");
 	Texture enemytexture = LoadTexture("test1.png");
-	Font DTMono = LoadFont("font/determination-mono.ttf");
-	Font utdotumche = LoadFont("font/undertale-dotumche.ttf");
+	Font DTMono = LoadFont("font/dtmono.fnt");//, 26, NULL, 95);
+	Font utdotumche  = LoadFont("font/undertale-dotumche.ttf"); // utdotumche
 	Font dotumche = LoadFont("font/dotumche.ttf");
 	Font mars = LoadFont("font/mars.ttf");
 	Texture kr_texture = LoadTexture("ui/spr_krmeter_0.png");
 	Texture hp_texture = LoadTexture("ui/spr_hpname_0.png");
 	Sound menuMoveSound = LoadSound("menuMove.ogg");
+	//Image tmp1=LoadImageFromTexture(DTMono.texture);
+    //ImageAlphaClear(&tmp1,(Color){0,0,0,0},0.5);
+    //UnloadTexture(DTMono.texture);
+    //DTMono.texture=LoadTextureFromImage(tmp1);
+    //UnloadImage(tmp1);
+    //SetTextureFilter(DTMono.texture,TEXTURE_FILTER_POINT);
 	// game loop
 	while (!WindowShouldClose())		// run the loop untill the user presses ESCAPE or presses the Close button on the window
 	{
@@ -192,7 +198,7 @@ int main ()
 						if (BattleState == PLAYER){
 							PlayerAction = SB;
 						} else {
-							BattleState = PLAYER;
+							BattleState = PLAYER; // this is just for now
 						}
 					}
 					break;
@@ -238,7 +244,7 @@ int main ()
 		//DrawLineV(arenaShape[1], arenaShape[2], RED);
 		dinc();
 		//DrawTextFont(dialogueSF, 52, 274, 32, WHITE, DTMono);
-		DrawTextEx(DTMono, dialogueSF, (Vector2){52, 274}, DTMono.baseSize, 1, WHITE);
+		DrawTextEx(DTMono, dialogueSF, (Vector2){52-4, 274-6}, 32, 0, WHITE); // IT WOOOOOOORKS
 		//DrawLineV(arenaShape[2], arenaShape[3], RED);
 		//DrawLineV(arenaShape[3], arenaShape[0], RED);
 		// void DrawRectangleLinesEx(Rectangle rec, float lineThick, Color color);
