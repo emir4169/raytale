@@ -34,9 +34,20 @@ void dinc(int index) {
 		dialogueSF[index][dialogueIndexes[index]] = '\0'; // null terminate the string
 	}
 }
+bool dcheck(int index) {
+	if (dialogueIndexes[index] < strlen(dialogueTBR[index])) {
+		return true; // still has characters to render
+	} else {
+		return false; // no more characters to render
+	}
+}
+
 void dreset(int index) {
 	dialogueIndexes[index] = 0; // reset the index
-	dialogueSF[index][0] = '\0'; // reset the string
+	//dialogueSF[index][0] = '\0'; // reset the string
+	for (int i = 0; i < strlen(dialogueTBR[index]); i++) {
+		dialogueSF[index][i] = ' '; // reset the string properly
+	}
 }
 void handleSoulMovement() {
 			if (IsKeyDown(KEY_X))
@@ -149,7 +160,43 @@ int main ()
 		case PLAYER:
 			switch (PlayerAction)
 			{
-				case (SB): dialogueEnabled[0] = true; selectButtonHandler(menuMoveSound); break; // select button
+				case (SB): dialogueEnabled[0] = true; dialogueEnabled[1] = false; selectButtonHandler(menuMoveSound); break; // select button
+				case (ACT_SE):
+				    SoulPos = (Vector2){SoulPositions[0].x, SoulPositions[0].y+10};
+					dialogueEnabled[0] = false;
+					strcpy(dialogueTBR[1], "* Test Enemy");
+					strcpy(dialogueSF[1], "* Test Enemy"); // okay fine i didnt HAVE to do it this time
+					dialogueEnabled[1] = true;
+					if (IsKeyPressed(KEY_Z)) {
+						PlayerAction = ACT_SA; // select action
+						dreset(0);
+					}
+					break;
+				case (ACT_SA):
+					
+					dreset(1);
+					strcpy(dialogueTBR[1], "* Take damage");
+					strcpy(dialogueSF[1], "* Take damage"); // i hate that i have to do this for it to WORK
+					if (IsKeyPressed(KEY_Z)) {
+						dialogueEnabled[1] = false; // disable the first action dialogue
+						SoulPos = (Vector2){9999,9999};
+						strcpy(dialogueTBR[1],"*                           ");
+						strcpy(dialogueSF[1], "*                           ");
+						dreset(1);
+						strcpy(dialogueTBR[0], "* You took damage.");
+						dialogueEnabled[0] = true;
+						dreset(0);
+						player.HP -= 1;
+						PlayerAction = ACT_TEXT; // go to the text action so we cant get ourselves into a inf act loop
+					}
+				case (ACT_TEXT):
+					if (!dcheck(0) && IsKeyPressed(KEY_Z)){
+						PlayerAction = SB; // go back to select button
+						strcpy(dialogueTBR[0], "* Ouch.");
+						strcpy(dialogueSF[0], "*                           ");
+						dreset(0);
+					}
+				break;
 				default:
 					if (IsKeyPressed(KEY_X)){
 						if (BattleState == PLAYER){
