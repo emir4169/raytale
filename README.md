@@ -9,16 +9,16 @@ CHECKLIST THAT I TOTALLY DIDNT ADD JUST NOW:
 * [x] render the gosh darn stats
 * [x] make the arena render in a way that is accurate to the game
 * [x] menuMove.ogg
-* [x] add basic menu travelling thingamajings, it probably doesnt count cause no menus to travel
+* [x] add basic menu travelling thingamajings
 * [ ] fighting
 * [x] add the 7 human dialogue spots
-* [ ] acting
+* [x] acting
 * [ ] items
 * [ ] egg
 * [ ] attacks
 * [ ] obligatory kr
 
 ## HOW LONG DID THIS TAKE
-like 6 hours so far im not the smartest ok
+like 10 hours so far im not the smartest ok
 ## CREDITS
 [sawby08](https://github.com/sawby08) for the fonts n sprites in their lovetale project
