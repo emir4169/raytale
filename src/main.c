@@ -12,106 +12,93 @@ by Jeffery Myers is marked with CC0 1.0. To view a copy of this license, visit h
 #include <stdio.h>
 #include <string.h>
 #include "resource_dir.h"	// utility header for SearchAndSetResourceDir
-#define ARENA_OFFSET_X 32
-#define ARENA_OFFSET_Y 250
-#define ARENA_LENGTH 4
-Vector2 arenaShape[ARENA_LENGTH] = {
-	{0+ARENA_OFFSET_X, 0+ARENA_OFFSET_Y},
-	{573+ARENA_OFFSET_X, 0+ARENA_OFFSET_Y},
-	{573+ARENA_OFFSET_X, 137+ARENA_OFFSET_Y},
-	{0+ARENA_OFFSET_X,137+ARENA_OFFSET_Y}
-};
-Vector2 ButtonPos[4] = {
-	{27, 432},   // fight button
-	{185, 432},  // act button
-	{343, 432},  // item button
-	{501, 432}   // mercy button
-};
-struct PlayerStruct
-{
-	int LOVE;
-	int HP;
-	int maxHP;
-	char name[6];
-};
+#include "main.h"
 struct PlayerStruct player = { 1, 20, 20, "CHARA" };
 int button_selected = 0; // 0 = fight, 1 = act, 2 = item, 3 = mercy
 Vector2 SoulPos = { 36, 254 }; // position of the soul in the arena
 int SoulSpeed = 4;
 bool isSlow = false; // X button thingamajing
-typedef enum BattleStateEnum { PLAYER = 0, ENEMY } BattleStateEnum; // this stores the core state of the battle
-typedef enum ButtonEnum { FIGHT = 0, ACT, ITEM, MERCY } ButtonEnum; // this stores the buttons
-typedef enum PlayerActionEnum { SB = 0, FIGHT_SE, FIGHT_MG, ACT_SE, ACT_SA, ITEM_ACT, MERCY_SE } PlayerActionEnum; // SE stands for Select Enemy, MG stands for MiniGame and SA stands for Select Action
 PlayerActionEnum PlayerAction = SB; // SB is select button
 BattleStateEnum BattleState = PLAYER;
 // dialogue stuff
-char dialogueTBR[256] = "* You encountered the Dummy"; // what we are gonna render
-char dialogueSF[256] = ""; // string of how much we have rendered so far
-int dialogueIndex = 0; // index of the current dialogue character
+char dialogueTBR[7][256] = {"* You encountered the Dummy","* Criticize","* Criticize","* Criticize","* Criticize","* Criticize","* Criticize"}; // what we are gonna render
+char dialogueSF[7][256] = {"","","","","","","",""}; // string of how much we have rendered so far
+int dialogueIndexes[7] = {0,0,0,0,0,0,0}; // index of the current dialogue character
+bool dialogueEnabled[7] = {true,false,false,false,false,false,false}; // which dialogue strings are gonna be shown
 // function to increment the dialogue index along with the string
-void dinc() {
-	if (dialogueIndex < strlen(dialogueTBR)) {
-		dialogueSF[dialogueIndex] = dialogueTBR[dialogueIndex];
-		dialogueIndex++;
+void dinc(int index) {
+	if (dialogueIndexes[index] < strlen(dialogueTBR[index])) {
+		dialogueSF[index][dialogueIndexes[index]] = dialogueTBR[index][dialogueIndexes[index]];
+		dialogueIndexes[index]++;
 	} else {
-		dialogueSF[dialogueIndex] = '\0'; // null terminate the string
+		dialogueSF[index][dialogueIndexes[index]] = '\0'; // null terminate the string
 	}
 }
-void dreset() {
-	dialogueIndex = 0; // reset the index
-	dialogueSF[0] = '\0'; // reset the string
+void dreset(int index) {
+	dialogueIndexes[index] = 0; // reset the index
+	dialogueSF[index][0] = '\0'; // reset the string
 }
-
-void DrawShape(Vector2 *shape, int numPoints, Color color)
-{
-	for (int i = 0; i < numPoints; i++)
-	{
-		int nextIndex = (i + 1) % numPoints;
-		DrawLineV(shape[i], shape[nextIndex], color);
-	}
+void handleSoulMovement() {
+			if (IsKeyDown(KEY_X))
+			{
+				isSlow = true;
+			} else if (IsKeyUp(KEY_X))
+			{
+				isSlow = false;
+			}
+			if (IsKeyDown(KEY_RIGHT))
+			{
+				SoulPos.x += SoulSpeed/(isSlow ? 2 : 1);
+			}
+			if (IsKeyDown(KEY_LEFT))
+			{
+				SoulPos.x -= SoulSpeed/(isSlow ? 2 : 1);
+			}
+			if (IsKeyDown(KEY_UP))
+			{
+				SoulPos.y -= SoulSpeed/(isSlow ? 2 : 1);
+			}
+			if (IsKeyDown(KEY_DOWN))
+			{	
+				SoulPos.y += SoulSpeed/(isSlow ? 2 : 1);
+			}
+			// keep the soul inside the arena
+			if (SoulPos.x < arenaShape[0].x) SoulPos.x = arenaShape[0].x; // left side
+			if (SoulPos.x > arenaShape[1].x - (16)) SoulPos.x = arenaShape[1].x - (16); // right side
+			if (SoulPos.y < arenaShape[0].y) SoulPos.y = arenaShape[0].y; // top side
+			if (SoulPos.y > arenaShape[2].y - (16)) SoulPos.y = arenaShape[2].y - (16); // bottom side
 }
+void selectButtonHandler(Sound menuMoveSound) {
 
-
-void DrawShapeLS(Vector2 *shape, int numPoints, Color color, int thickness)
-{
-    // Calculate grid size
-    const int gridSize = thickness;
-    
-    // Create a temporary point array
-    Vector2 *tempPoints = (Vector2 *)malloc(numPoints * sizeof(Vector2));
-    if (!tempPoints) return;
-    
-    // Draw the shape with perfect thickness
-    for (int dx = -thickness; dx <= thickness; dx++) {
-        for (int dy = -thickness; dy <= thickness; dy++) {
-            // Skip center for even thickness to maintain symmetry
-            if (thickness % 2 == 0 && dx == 0 && dy == 0) continue;
-            
-            // Apply offset to all points
-            for (int i = 0; i < numPoints; i++) {
-                tempPoints[i].x = shape[i].x + dx;
-                tempPoints[i].y = shape[i].y + dy;
-            }
-            
-            // Draw the offset shape
-            DrawShape(tempPoints, numPoints, color);
-        }
-    }
-    
-    free(tempPoints);
-}
-void DrawTextFont(const char *text, int posX, int posY, int fontSize, Color color, Font font)
-{
-    // Check if default font has been loaded
-    if (font.texture.id != 0)
-    {
-        Vector2 position = { (float)posX, (float)posY };
-        int defaultFontSize = 13.333;   // Default Font chars height in pixel
-        if (fontSize < defaultFontSize) fontSize = defaultFontSize;
-        int spacing = fontSize/defaultFontSize;
-
-        DrawTextEx(font, text, position, (float)fontSize, (float)spacing, color);
-    }
+					if (IsKeyPressed(KEY_RIGHT))	
+					{
+						PlaySound(menuMoveSound);
+						button_selected++;
+						if (button_selected > 3) button_selected = 0; // wrap around
+					}
+					else if (IsKeyPressed(KEY_LEFT))
+					{
+						PlaySound(menuMoveSound);
+						button_selected--;
+						if (button_selected < 0) button_selected = 3; // wrap around
+					}
+					if (IsKeyPressed(KEY_Z)){
+						switch (button_selected)
+						{
+						case FIGHT:
+							PlayerAction = FIGHT_SE;
+							break;
+						case ACT:
+							PlayerAction = ACT_SE;
+							break;
+						case ITEM:
+							PlayerAction = ITEM_ACT;
+							break;
+						case MERCY:
+							PlayerAction = MERCY_SE;
+							break;
+						}
+					}
 }
 
 int main ()
@@ -162,37 +149,7 @@ int main ()
 		case PLAYER:
 			switch (PlayerAction)
 			{
-				case (SB): // OH GOD SWITH CASES IN SWITCH CASES
-					if (IsKeyPressed(KEY_RIGHT))	
-					{
-						PlaySound(menuMoveSound);
-						button_selected++;
-						if (button_selected > 3) button_selected = 0; // wrap around
-					}
-					else if (IsKeyPressed(KEY_LEFT))
-					{
-						PlaySound(menuMoveSound);
-						button_selected--;
-						if (button_selected < 0) button_selected = 3; // wrap around
-					}
-					if (IsKeyPressed(KEY_Z)){
-						switch (button_selected)
-						{
-						case FIGHT:
-							PlayerAction = FIGHT_SE;
-							break;
-						case ACT:
-							PlayerAction = ACT_SE;
-							break;
-						case ITEM:
-							PlayerAction = ITEM_ACT;
-							break;
-						case MERCY:
-							PlayerAction = MERCY_SE;
-							break;
-						}
-					}
-					break;
+				case (SB): dialogueEnabled[0] = true; selectButtonHandler(menuMoveSound); break; // select button
 				default:
 					if (IsKeyPressed(KEY_X)){
 						if (BattleState == PLAYER){
@@ -206,34 +163,10 @@ int main ()
 			}
 			break;
 		case ENEMY:
-			if (IsKeyDown(KEY_X))
-			{
-				isSlow = true;
-			} else if (IsKeyUp(KEY_X))
-			{
-				isSlow = false;
+			for (int i = 0; i < 7; i++) {
+				dialogueEnabled[i] = false;
 			}
-			if (IsKeyDown(KEY_RIGHT))
-			{
-				SoulPos.x += SoulSpeed/(isSlow ? 2 : 1);
-			}
-			if (IsKeyDown(KEY_LEFT))
-			{
-				SoulPos.x -= SoulSpeed/(isSlow ? 2 : 1);
-			}
-			if (IsKeyDown(KEY_UP))
-			{
-				SoulPos.y -= SoulSpeed/(isSlow ? 2 : 1);
-			}
-			if (IsKeyDown(KEY_DOWN))
-			{	
-				SoulPos.y += SoulSpeed/(isSlow ? 2 : 1);
-			}
-			// keep the soul inside the arena
-			if (SoulPos.x < arenaShape[0].x) SoulPos.x = arenaShape[0].x; // left side
-			if (SoulPos.x > arenaShape[1].x - (16)) SoulPos.x = arenaShape[1].x - (16); // right side
-			if (SoulPos.y < arenaShape[0].y) SoulPos.y = arenaShape[0].y; // top side
-			if (SoulPos.y > arenaShape[2].y - (16)) SoulPos.y = arenaShape[2].y - (16); // bottom side
+			handleSoulMovement();
 			break;
 		}
 
@@ -242,9 +175,17 @@ int main ()
 		//DrawLine(int startPosX, int startPosY, int endPosX, int endPosY, Color color);  
 		//DrawLineV(arenaShape[0], arenaShape[1], RED);
 		//DrawLineV(arenaShape[1], arenaShape[2], RED);
-		dinc();
-		//DrawTextFont(dialogueSF, 52, 274, 32, WHITE, DTMono);
-		DrawTextEx(DTMono, dialogueSF, (Vector2){52-4, 274-6}, 32, 0, WHITE); // IT WOOOOOOORKS
+		if (dialogueEnabled[0] == true) { // main text
+			dinc(0);
+			DrawTextEx(DTMono, dialogueSF[0], (Vector2){52-4, 274-6}, 32, 0, WHITE); // IT WOOOOOOORKS
+		}
+		for (int i = 1; i < 7; i++) {
+			if (dialogueEnabled[i] == true) { // nonmain text
+				dinc(i);
+				DrawTextEx(DTMono, dialogueSF[i], SoulPositions[i-1], 32, 0, WHITE); // IT WOOOOOOORKS
+			}
+		}
+
 		//DrawLineV(arenaShape[2], arenaShape[3], RED);
 		//DrawLineV(arenaShape[3], arenaShape[0], RED);
 		// void DrawRectangleLinesEx(Rectangle rec, float lineThick, Color color);
@@ -281,30 +222,22 @@ int main ()
 		switch (BattleState)
 		{
 		case PLAYER:
+			DrawTextureV(fightbtt, 			ButtonPos[0], WHITE);
+			DrawTextureV(actbtt,   			ButtonPos[1], WHITE);
+			DrawTextureV(itembtt,  			ButtonPos[2], WHITE);
+			DrawTextureV(mercybtt, 			ButtonPos[3], WHITE);
 			switch (button_selected)
 			{
-				case 0:
+				case FIGHT:
 					DrawTextureV(fightbtt_selected, ButtonPos[0], WHITE);
-					DrawTextureV(actbtt,   			ButtonPos[1], WHITE);
-					DrawTextureV(itembtt,  			ButtonPos[2], WHITE);
-					DrawTextureV(mercybtt, 			ButtonPos[3], WHITE);
 					break;
-				case 1:
-					DrawTextureV(fightbtt, 			ButtonPos[0], WHITE);
+				case ACT:
 					DrawTextureV(actbtt_selected, 	ButtonPos[1], WHITE);
-					DrawTextureV(itembtt,  			ButtonPos[2], WHITE);
-					DrawTextureV(mercybtt, 			ButtonPos[3], WHITE);
 					break;
-				case 2:
-					DrawTextureV(fightbtt, 			ButtonPos[0], WHITE);
-					DrawTextureV(actbtt,   			ButtonPos[1], WHITE);
+				case ITEM:
 					DrawTextureV(itembtt_selected,  ButtonPos[2], WHITE);
-					DrawTextureV(mercybtt, 			ButtonPos[3], WHITE);
 					break;
-				case 3:
-					DrawTextureV(fightbtt, 			ButtonPos[0], WHITE);
-					DrawTextureV(actbtt,   			ButtonPos[1], WHITE);
-					DrawTextureV(itembtt,  			ButtonPos[2], WHITE);
+				case MERCY:
 					DrawTextureV(mercybtt_selected, ButtonPos[3], WHITE);
 					break;
 				default:
@@ -312,6 +245,8 @@ int main ()
 			}
 			if (PlayerAction == SB){
 				DrawTexture(hearttexture, ButtonPos[button_selected].x+8, ButtonPos[button_selected].y+13, RED);
+			} else {
+				DrawTextureV(hearttexture, SoulPos, RED);
 			}
 			break;
 		case ENEMY:
