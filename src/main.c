@@ -13,7 +13,7 @@ by Jeffery Myers is marked with CC0 1.0. To view a copy of this license, visit h
 #include <string.h>
 #include "resource_dir.h"	// utility header for SearchAndSetResourceDir
 #include "main.h"
-struct PlayerStruct player = { 1, 20, 20, "CHARA" };
+struct PlayerStruct player = { 1, 20, 20, "RAYLIB" };
 int button_selected = 0; // 0 = fight, 1 = act, 2 = item, 3 = mercy
 Vector2 SoulPos = { 36, 254 }; // position of the soul in the arena
 int SoulSpeed = 4;
@@ -21,8 +21,9 @@ bool isSlow = false; // X button thingamajing
 PlayerActionEnum PlayerAction = SB; // SB is select button
 BattleStateEnum BattleState = PLAYER;
 // dialogue stuff
-char dialogueTBR[7][256] = {"* You encountered the Dummy","* Criticize","* Criticize","* Criticize","* Criticize","* Criticize","* Criticize"}; // what we are gonna render
-char dialogueSF[7][256] = {"","","","","","","",""}; // string of how much we have rendered so far
+int selAct = ACT_TAKEONEDAMAGE;
+char dialogueTBR[7][256] = {"* You encountered the Dummy.","* Criticize","* Criticize","* Criticize","* Criticize","* Criticize","* Criticize"}; // what we are gonna render
+char dialogueSF[7][256] = {"","","","","","",""}; // string of how much we have rendered so far
 int dialogueIndexes[7] = {0,0,0,0,0,0,0}; // index of the current dialogue character
 bool dialogueEnabled[7] = {true,false,false,false,false,false,false}; // which dialogue strings are gonna be shown
 // function to increment the dialogue index along with the string
@@ -47,6 +48,72 @@ void dreset(int index) {
 	//dialogueSF[index][0] = '\0'; // reset the string
 	for (int i = 0; i < strlen(dialogueTBR[index]); i++) {
 		dialogueSF[index][i] = ' '; // reset the string properly
+	}
+}
+void handleActSelection() {
+	dialogueEnabled[1] = true; // enable the first action dialogue
+	dialogueEnabled[2] = true; // enable the second action dialogue
+	strcpy(dialogueTBR[1],"* Take damage");
+    strcpy(dialogueSF[1], "* Take damage");
+	strcpy(dialogueTBR[2],"* Heal damage");
+    strcpy(dialogueSF[2], "* Heal damage");
+	if (IsKeyPressed(KEY_RIGHT))
+	{
+		// move to second option if at first option, move back to first option if at second option
+		if (selAct == ACT_TAKEONEDAMAGE) {
+			selAct = ACT_HEALBYONE;
+		} else {
+			selAct = ACT_TAKEONEDAMAGE;
+		}
+	}
+	if (IsKeyPressed(KEY_LEFT))
+	{
+		// move to first option if at second option, move back to second option if at first option
+		if (selAct == ACT_HEALBYONE) {
+			selAct = ACT_TAKEONEDAMAGE;
+		} else {
+			selAct = ACT_HEALBYONE;
+		}
+	}
+	SoulPos = (Vector2){SoulPositions[selAct].x, SoulPositions[selAct].y+10};
+	if (IsKeyPressed(KEY_Z)) {
+		dialogueEnabled[1] = false; // disable the first action dialogue
+        dialogueEnabled[2] = false;
+		strcpy(dialogueTBR[1],"*                           ");
+        strcpy(dialogueSF[1], "*                           ");
+		strcpy(dialogueTBR[2],"*                           ");
+        strcpy(dialogueSF[2], "*                           ");
+        dreset(1);
+		dreset(2);
+		switch (selAct) {
+			case ACT_TAKEONEDAMAGE:
+				
+                SoulPos = (Vector2){9999,9999}; // bye bye!
+                strcpy(dialogueTBR[0], "* You took damage.");
+                dialogueEnabled[0] = true;
+                dreset(0);
+                player.HP -= 1;
+				break;
+			case ACT_HEALBYONE:
+				SoulPos = (Vector2){9999,9999}; // bye bye!
+				if (player.HP < player.maxHP) {
+					player.HP += 1;
+					strcpy(dialogueTBR[0], "* You healed yourself.");
+					dialogueEnabled[0] = true;
+					dreset(0);
+				} else {
+					strcpy(dialogueTBR[0], "* You are already at max HP.");
+					dialogueEnabled[0] = true;
+					dreset(0);
+				}
+				break;
+			default:
+				strcpy(dialogueTBR[0], "* Something broke.");
+                dialogueEnabled[0] = true;
+                dreset(0);
+				break;
+		}
+		PlayerAction = ACT_TEXT; // go to the text action so we cant get ourselves into a inf act loop
 	}
 }
 void handleSoulMovement() {
@@ -171,24 +238,40 @@ int main ()
 						PlayerAction = ACT_SA; // select action
 						dreset(0);
 					}
+					if (IsKeyPressed(KEY_X)){
+						if (BattleState == PLAYER){
+							dialogueEnabled[1] = false;
+							dialogueEnabled[2] = false;
+							strcpy(dialogueTBR[1],"*                           ");
+        					strcpy(dialogueSF[1], "*                           ");
+							strcpy(dialogueTBR[2],"*                           ");
+        					strcpy(dialogueSF[2], "*                           ");
+        					dreset(1);
+							dreset(2);
+							PlayerAction = SB;
+						} else {
+							BattleState = PLAYER; // this is just for now
+						}
+					}
 					break;
 				case (ACT_SA):
-					
-					dreset(1);
-					strcpy(dialogueTBR[1], "* Take damage");
-					strcpy(dialogueSF[1], "* Take damage"); // i hate that i have to do this for it to WORK
-					if (IsKeyPressed(KEY_Z)) {
-						dialogueEnabled[1] = false; // disable the first action dialogue
-						SoulPos = (Vector2){9999,9999};
-						strcpy(dialogueTBR[1],"*                           ");
-						strcpy(dialogueSF[1], "*                           ");
-						dreset(1);
-						strcpy(dialogueTBR[0], "* You took damage.");
-						dialogueEnabled[0] = true;
-						dreset(0);
-						player.HP -= 1;
-						PlayerAction = ACT_TEXT; // go to the text action so we cant get ourselves into a inf act loop
+					if (IsKeyPressed(KEY_X)){
+						if (BattleState == PLAYER){
+							dialogueEnabled[1] = false;
+							dialogueEnabled[2] = false;
+							strcpy(dialogueTBR[1],"*                           ");
+        					strcpy(dialogueSF[1], "*                           ");
+							strcpy(dialogueTBR[2],"*                           ");
+        					strcpy(dialogueSF[2], "*                           ");
+        					dreset(1);
+							dreset(2);
+							PlayerAction = ACT_SE;
+						} else {
+							BattleState = PLAYER; // this is just for now
+						}
 					}
+					handleActSelection();
+					break;
 				case (ACT_TEXT):
 					if (!dcheck(0) && IsKeyPressed(KEY_Z)){
 						PlayerAction = SB; // go back to select button
@@ -225,11 +308,19 @@ int main ()
 		if (dialogueEnabled[0] == true) { // main text
 			dinc(0);
 			DrawTextEx(DTMono, dialogueSF[0], (Vector2){52-4, 274-6}, 32, 0, WHITE); // IT WOOOOOOORKS
+			if (IsKeyDown(KEY_X)) {
+					// set dialogueSF to dialogueTBR so it gets rendered instantly
+					strcpy(dialogueSF[0], dialogueTBR[0]);
+				}
 		}
 		for (int i = 1; i < 7; i++) {
 			if (dialogueEnabled[i] == true) { // nonmain text
 				dinc(i);
 				DrawTextEx(DTMono, dialogueSF[i], SoulPositions[i-1], 32, 0, WHITE); // IT WOOOOOOORKS
+				if (IsKeyDown(KEY_X)) {
+					// set dialogueSF to dialogueTBR so it gets rendered instantly
+					strcpy(dialogueSF[i], dialogueTBR[i]);
+				}
 			}
 		}
 

@@ -30,6 +30,7 @@ struct PlayerStruct
 	char name[6];
 };
 // 0 = fight, 1 = act, 2 = item, 3 = mercy
+typedef enum ActsEnum { ACT_TAKEONEDAMAGE = 0, ACT_HEALBYONE } ActsEnum;
 typedef enum BattleStateEnum { PLAYER = 0, ENEMY } BattleStateEnum; // this stores the core state of the battle
 typedef enum ButtonEnum { FIGHT = 0, ACT, ITEM, MERCY } ButtonEnum; // this stores the buttons
 typedef enum PlayerActionEnum { SB = 0, FIGHT_SE, FIGHT_MG, ACT_SE, ACT_SA, ITEM_ACT, MERCY_SE, ACT_TEXT } PlayerActionEnum; // SE stands for Select Enemy, MG stands for MiniGame and SA stands for Select Action
