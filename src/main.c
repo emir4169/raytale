@@ -255,7 +255,8 @@ int main ()
 					}
 					break;
 				case (ACT_SA):
-					if (IsKeyPressed(KEY_X)){
+					handleActSelection();
+										if (IsKeyPressed(KEY_X)){
 						if (BattleState == PLAYER){
 							dialogueEnabled[1] = false;
 							dialogueEnabled[2] = false;
@@ -270,7 +271,6 @@ int main ()
 							BattleState = PLAYER; // this is just for now
 						}
 					}
-					handleActSelection();
 					break;
 				case (ACT_TEXT):
 					if (!dcheck(0) && IsKeyPressed(KEY_Z)){
@@ -279,6 +279,7 @@ int main ()
 						strcpy(dialogueSF[0], "*                           ");
 						dreset(0);
 					}
+					
 				break;
 				default:
 					if (IsKeyPressed(KEY_X)){
